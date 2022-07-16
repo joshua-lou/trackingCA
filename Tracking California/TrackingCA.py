@@ -4,61 +4,86 @@ import json
 import csv
 import openpyxl
 from datetime import date
+import os.path
+import sys
 
 ############################################################### 
 # 
-# the selected indicators from HPI
+# counties to retreive are in counties.csv, first column being 
+# the name of the county and second column the ID from the HPI website 
 # 
+# the indicators to retrieve from HPI
 indicators = [220, 228, 236, 226, 227, 239, 235, 223, 229, 237]
 # 
-# counties to retreive are in counties.csv, first column being 
-# the name of the county and second column the ID from the HPI 
-# website
+# downloaded the excel file from https://calenviroscreen-oehha.hub.arcgis.com/#Data 
+# the selected indicators (column index) from CalEnviroScreen spreadsheet above
+indicatorsCES = ['AY', 'BA', 'AU', 'N', 'L', 'R', 'AD', 'AF', 'X', 'P']
+# (Poverty, Unemployment, Education, PM 2.5, Ozone, Drinking water, Groundwater threats, Hazardous waste, Toxic release, Diesel PM)
 # 
-# the selected indicators from CalEnviroScreen
-# Poverty, Unemployment, Education, PM 2.5, Ozone, Drinking water, Groundwater threats, Hazardous waste, Toxic release, Diesel PM
-# 
-indicatorsCES = ['AY', 'BA', 'AU', 'N', 'K', 'R', 'AD', 'AF', 'X', 'P']
-#
 ###############################################################
+
+
 
 # returns a 2 dimensional array of all the county names and their respective county ID's
 def getCounties():
     counties = []
-    with open('/Users/Joshua/Desktop/trackingCA/Tracking California/counties.csv', 'r') as file:
+    with open('counties.csv', 'r') as file:
         reader = csv.reader(file)
         for county in reader:
             counties.append(county)
     return counties
 
-# create CSV file
+# construct county name index map
+def getCountyMap():
+    countiesCES = {}
+    countyID = 0
+    with open('counties.csv', 'r') as file:
+        reader = csv.reader(file)
+        for county in reader:
+            countiesCES[county[0].strip()] = countyID
+            countyID += 1
+    return countiesCES
+
+# create output CSV file
 def writeResult(dataArr):
-    with open('/Users/Joshua/Desktop/trackingCA/Tracking California/data.csv', 'w', encoding='UTF8', newline='') as f:
+    with open('indicator-data.csv', 'w', encoding='UTF8', newline='') as f:
         writer = csv.writer(f)
         for row in dataArr:
             writer.writerow(row)
-    print("data.csv updated successfully")
+    print("indicator-data.csv updated successfully\n")
 
+# see if excel file is in the same folder
+def getCalEnviroScreenExcelFile():
+    excel_files = []
+    files = os.listdir('.')
+    for f in files:
+        if (f.endswith('.xlsx')):
+            excel_files.append(f)
+        
+    if len(excel_files) == 0:
+        sys.exit("\n[!] Error: No excel file exists\n")
+    elif len(excel_files) == 1:
+        return excel_files[0]
+    else:
+        sys.exit("\n[!] Error: More than one excel file\n")
 
-####################### HPI #######################
+####################### HPI ########################
 counties = getCounties()
+print("Retrieving HPI county data...")
 # final array that contains indicator values for all counties
-dataArr = [["" for i in range(len(counties)+1)] for j in range(len(indicators)*2+1+len(indicatorsCES))]
+dataArr = [["" for i in range(len(counties)+1)] for j in range(len(indicators)+1+len(indicatorsCES))]
 countyIndex = 1
 for i in range(0, len(counties)):
     # get indicator value and percentile for each county and add it to dataArr
     countyID = counties[i][1].strip()
     dataArr[0][countyIndex] = counties[i][0]
-    print("Getting county ID " + countyID + "...")
+    print("  Getting data for " + counties[i][0].strip() + "...")
     response = requests.post('https://map.healthyplacesindex.org/api/v1/conditions/', json= {"geography":6,"geoid":countyID,"attributes":["percentile","value"],"indicator":indicators,"year":date.today().year})
     rowIndex = 1
     for e in response.json()['response']:
         for a in e['indicators']:
-            dataArr[rowIndex][0] = a['title'] + " value"
-            dataArr[rowIndex][countyIndex] = a['value']
-            rowIndex += 1
-            dataArr[rowIndex][0] = a['title'] + " rank"
-            dataArr[rowIndex][countyIndex] = float(a['percentile'])*100
+            dataArr[rowIndex][0] = a['title'] + " Pctl"
+            dataArr[rowIndex][countyIndex] = a['percentile']*100 if a['percentile'] is not None else ""
             rowIndex += 1
     countyIndex += 1
 
@@ -66,20 +91,14 @@ for i in range(0, len(counties)):
 
 ####################### CalEnviroScreen #######################
 
+print("\nCalculating CalEnviroScreen county data...")
 #read excel file
-wb = openpyxl.load_workbook("/Users/Joshua/Desktop/trackingCA/Tracking California/calenviroscreen40resultsdatadictionary_F_2021.xlsx")
-first_sheet = wb.get_sheet_names()[0]
-worksheet = wb.get_sheet_by_name(first_sheet)
+wb = openpyxl.load_workbook(getCalEnviroScreenExcelFile())
+worksheet = wb.worksheets[0]
 ws = wb.active
 
 # construct county lookup dictionary
-countiesCES = {}
-countyID = 0
-with open('/Users/Joshua/Desktop/trackingCA/Tracking California/counties.csv', 'r') as file:
-    reader = csv.reader(file)
-    for county in reader:
-        countiesCES[county[0].strip()] = countyID
-        countyID += 1
+countiesCES = getCountyMap()
 
 # create 2D list for the counties, number of tracts, sum of indicator values to be able to get the average for each indicator
 sums = [[0 for i in range(59)] for j in range(len(indicatorsCES))]
@@ -90,7 +109,7 @@ printArr = [["empty" for i in range(59)] for j in range(len(indicatorsCES))]
 indicatorsCES_counter = 0
 for i in indicatorsCES:
     cell_name = "{}1".format(i)
-    dataArr[indicatorsCES_counter + len(indicators)*2+1][0] = worksheet[cell_name].value
+    dataArr[indicatorsCES_counter + len(indicators)+1][0] = worksheet[cell_name].value
     indicatorsCES_counter += 1
 
 for row in range(2,worksheet.max_row+1):
@@ -116,9 +135,21 @@ for row in range(2,worksheet.max_row+1):
 for row in range(0,len(sums)):
     for col in range(len(sums[0])):
         if tract_counter[row][col] != 0:
-            dataArr[row + len(indicators)*2+1][col] = sums[row][col]/tract_counter[row][col]
-    print(dataArr[row + len(indicators)*2+1][0],"average values calculated...")
+            dataArr[row + len(indicators)+1][col] = sums[row][col]/tract_counter[row][col]
+    print("  ",dataArr[row + len(indicators)+1][0],"average values calculated.")
 
 writeResult(dataArr)
+
+# write json javascript
+json_data = {}
+for row in range(1,len(dataArr)):
+    counties_json_data = {}
+    for col in range(1,len(dataArr[0])):
+        counties_json_data[dataArr[0][col]] = dataArr[row][col]
+    json_data[dataArr[row][0]] = counties_json_data
+f = open("indicator-data.js", "w")
+f.write("const DATA = [" + json.dumps(json_data) + "];")
+f.close()
+
 
 
