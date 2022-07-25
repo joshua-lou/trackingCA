@@ -17,8 +17,8 @@ indicators = [220, 228, 236, 226, 227, 239, 235, 223, 229, 237]
 # 
 # downloaded the excel file from https://calenviroscreen-oehha.hub.arcgis.com/#Data 
 # the selected indicators (column index) from CalEnviroScreen spreadsheet above
-indicatorsCES = ['AY', 'BA', 'AU', 'N', 'L', 'R', 'AD', 'AF', 'X', 'P']
-# (Poverty, Unemployment, Education, PM 2.5, Ozone, Drinking water, Groundwater threats, Hazardous waste, Toxic release, Diesel PM)
+indicatorsCES = ['AY', 'BA', 'AU', 'N', 'R', 'AD', 'AF', 'X', 'P']
+# (Poverty, Unemployment, Education, PM 2.5, Ozone (L), Drinking water, Groundwater threats, Hazardous waste, Toxic release, Diesel PM)
 # 
 ###############################################################
 
@@ -142,14 +142,19 @@ writeResult(dataArr)
 
 # write json javascript
 json_data = {}
-for row in range(1,len(dataArr)):
+json_indicator_data = []
+for col in range(1,len(dataArr[0])):
     counties_json_data = {}
-    for col in range(1,len(dataArr[0])):
-        counties_json_data[dataArr[0][col]] = dataArr[row][col]
-    json_data[dataArr[row][0]] = counties_json_data
-f = open("indicator-data.js", "w")
-f.write("const DATA = [" + json.dumps(json_data) + "];")
-f.close()
+    for row in range(1,len(dataArr)):
+        counties_json_data[dataArr[row][0]] = dataArr[row][col]
+    json_data[dataArr[0][col]] = counties_json_data
+
+for row in range(1, len(dataArr)):
+    json_indicator_data.append(dataArr[row][0])
+
+with open('indicator-data.js', 'w') as f:
+    f.write("const DATA = " + json.dumps(json_data) + ";\n")
+    f.write("const indicators = " + json.dumps(json_indicator_data) + ";")
 
 
 
