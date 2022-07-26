@@ -3,7 +3,6 @@ const counties = Object.keys(DATA);
 const NORMAL_MARKER_SIZE = 14;
 const BIG_MARKER_SIZE = 20;
 const NORMAL_COLOR = "#D0D0D0";
-const CHOSEN_COLOR = "#888888";
 
 const indicatorToX = {};
 const XToIndicator = {};
@@ -12,12 +11,18 @@ for (let i = 0; i < indicators.length; i++) {
   XToIndicator[i + 1] = indicators[i];
 }
 
+const countyColors = {};
+for (let i = 0; i < counties.length; i++) {
+  const color = Math.floor(
+    Math.random() * (parseInt("FFFFFF", 16) + 1)
+  ).toString(16);
+  countyColors[counties[i]] = "#" + ("00000" + color).slice(-6);
+}
+
 const dataSeries = {};
 for (const [countyName, countyValues] of Object.entries(DATA)) {
   const dataPoints = [];
-  for (const [indicatorName, indicatorValue, indicatorColor] of Object.entries(
-    countyValues
-  )) {
+  for (const [indicatorName, indicatorValue] of Object.entries(countyValues)) {
     if (indicatorValue !== "") {
       dataPoints.push({
         x: indicatorToX[indicatorName],
@@ -87,13 +92,19 @@ window.onload = function () {
     }
 
     if (selected[index] !== "") {
-      dataSeries[selected[index]].markerSize = NORMAL_MARKER_SIZE;
-      dataSeries[selected[index]].color = NORMAL_COLOR;
+      Object.assign(dataSeries[selected[index]], {
+        markerSize: NORMAL_MARKER_SIZE,
+        color: NORMAL_COLOR,
+        showInLegend: false,
+      });
     }
     selected[index] = countyName;
     if (countyName !== "") {
-      dataSeries[countyName].markerSize = BIG_MARKER_SIZE;
-      dataSeries[countyName].color = CHOSEN_COLOR;
+      Object.assign(dataSeries[countyName], {
+        markerSize: BIG_MARKER_SIZE,
+        color: countyColors[countyName],
+        showInLegend: true,
+      });
 
       // Look through data array to find where this county is
       for (let i = 0; i < data.length; i++) {
