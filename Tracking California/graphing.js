@@ -4,11 +4,11 @@ const NORMAL_MARKER_SIZE = 14;
 const BIG_MARKER_SIZE = 20;
 const NORMAL_COLOR = "#D0D0D0";
 
-const indicatorToX = {};
-const XToIndicator = {};
+const indicatorToY = {};
+const YToIndicator = {};
 for (let i = 0; i < indicators.length; i++) {
-  indicatorToX[indicators[i]] = i + 1;
-  XToIndicator[i + 1] = indicators[i];
+  indicatorToY[indicators[i]] = i + 1;
+  YToIndicator[i + 1] = indicators[i];
 }
 
 const countyColors = {};
@@ -25,16 +25,16 @@ for (const [countyName, countyValues] of Object.entries(DATA)) {
   for (const [indicatorName, indicatorValue] of Object.entries(countyValues)) {
     if (indicatorValue !== "") {
       dataPoints.push({
-        x: indicatorToX[indicatorName],
-        y: indicatorValue,
-        yRounded: indicatorValue.toFixed(2),
+        y: indicatorToY[indicatorName],
+        x: indicatorValue,
+        value: indicatorValue.toFixed(2),
       });
     }
   }
   dataSeries[countyName] = {
     type: "scatter",
     toolTipContent:
-      '<span style="color:#4F81BC "><b>{name}</b></span><br/><b> Percentile:</b></span> {yRounded}',
+      '<span style="color:#4F81BC "><b>{name}</b></span><br/><b> Percentile:</b></span> {value}',
     name: countyName,
     markerSize: NORMAL_MARKER_SIZE,
     dataPoints: dataPoints,
@@ -43,23 +43,26 @@ for (const [countyName, countyValues] of Object.entries(DATA)) {
 }
 
 const textSize = 16;
+const NUM_DROPDOWNS = 3;
 window.onload = function () {
   const data = Object.values(dataSeries);
   const chart = new CanvasJS.Chart("chartContainer", {
     animationEnabled: true,
-    height: 700,
+    height: 900,
+    width: 1000,
     title: {
       text: "California County Indicators",
     },
-    axisX: {
+    axisY: {
       title: "Indicator",
       interval: 1,
       labelFontSize: textSize,
+      gridThickness: 0,
       labelFormatter: (e) => {
-        return XToIndicator[e.value] === undefined ? "" : XToIndicator[e.value];
+        return YToIndicator[e.value] === undefined ? "" : YToIndicator[e.value];
       },
     },
-    axisY: {
+    axisX: {
       title: "Percentile",
       interval: 10,
       maximum: 100,
@@ -75,10 +78,19 @@ window.onload = function () {
     countiesOptions +=
       '<option value="' + counties[i] + '">' + counties[i] + "</option>";
   }
-  document.getElementById("counties").innerHTML = countiesOptions;
-  document.getElementById("counties2").innerHTML = countiesOptions;
+  let dropdowns = "";
+  for (let i = 0; i < NUM_DROPDOWNS; i++) {
+    dropdowns +=
+      "<div>" +
+      "<strong> Select a county </strong>" +
+      '<select class="countyDropdown">' +
+      countiesOptions +
+      "</select>" +
+      "</div>";
+  }
+  document.getElementById("countiesDropdowns").innerHTML = dropdowns;
 
-  const selected = ["", ""];
+  const selected = new Array(NUM_DROPDOWNS).fill("");
   function handleDropdownChange(event, index) {
     const countyName = event.target.value;
 
@@ -121,8 +133,8 @@ window.onload = function () {
 
     chart.render();
   }
-  document.getElementById("counties").onchange = (event) =>
-    handleDropdownChange(event, 0);
-  document.getElementById("counties2").onchange = (event) =>
-    handleDropdownChange(event, 1);
+  const countyDropdowns = document.getElementsByClassName("countyDropdown");
+  for (let i = 0; i < countyDropdowns.length; i++) {
+    countyDropdowns[i].onchange = (event) => handleDropdownChange(event, i);
+  }
 };
