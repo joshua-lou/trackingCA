@@ -6,6 +6,7 @@ import openpyxl
 from datetime import date
 import os.path
 import sys
+import statistics
 
 ############################################################### 
 # 
@@ -144,18 +145,24 @@ writeResult(dataArr)
 # write json javascript
 json_data = {}
 json_indicator_data = []
+json_indicator_median = []
 for col in range(1,len(dataArr[0])):
+    col_array = []
     counties_json_data = {}
     for row in range(1,len(dataArr)):
         counties_json_data[dataArr[row][0]] = dataArr[row][col]
+        if (col != 0 and dataArr[row][col] != ''):
+            col_array.append(dataArr[row][col])
     json_data[dataArr[0][col]] = counties_json_data
+    json_indicator_median.append(statistics.median(col_array))
 
 for row in range(1, len(dataArr)):
     json_indicator_data.append(dataArr[row][0])
 
 with open('indicator-data.js', 'w') as f:
     f.write("const DATA = " + json.dumps(json_data) + ";\n")
-    f.write("const indicators = " + json.dumps(json_indicator_data) + ";")
+    f.write("const indicators = " + json.dumps(json_indicator_data) + ";\n")
+    f.write("const medians = " + json.dumps(json_indicator_median) + ";")
 
 
 
