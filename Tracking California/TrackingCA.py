@@ -17,7 +17,8 @@ indicators = [220, 228, 236, 226, 227, 239, 235, 223, 229, 237]
 # 
 # downloaded the excel file from https://calenviroscreen-oehha.hub.arcgis.com/#Data 
 # the selected indicators (column index) from CalEnviroScreen spreadsheet above
-indicatorsCES = ['AY', 'BA', 'AU', 'N', 'R', 'AD', 'AF', 'X', 'P']
+# percentiles: indicatorsCES = ['AY', 'BA', 'AU', 'N', 'R', 'AD', 'AF', 'X', 'P']
+indicatorsCES = ['AX', 'AZ', 'AT', 'M', 'Q', 'Ac', 'AE', 'W', 'O']
 # (Poverty, Unemployment, Education, PM 2.5, Ozone (L), Drinking water, Groundwater threats, Hazardous waste, Toxic release, Diesel PM)
 # 
 ###############################################################
@@ -65,7 +66,7 @@ def getCalEnviroScreenExcelFile():
     elif len(excel_files) == 1:
         return excel_files[0]
     else:
-        sys.exit("\n[!] Error: More than one excel file\n")
+        sys.exit("\n[!] Error: More than one excel file\n" + ', '.join(excel_files))
 
 ####################### HPI ########################
 counties = getCounties()
@@ -82,8 +83,8 @@ for i in range(0, len(counties)):
     rowIndex = 1
     for e in response.json()['response']:
         for a in e['indicators']:
-            dataArr[rowIndex][0] = a['title'] + " Pctl"
-            dataArr[rowIndex][countyIndex] = a['percentile']*100 if a['percentile'] is not None else ""
+            dataArr[rowIndex][0] = a['title']
+            dataArr[rowIndex][countyIndex] = a['value'] if a['value'] is not None else ""
             rowIndex += 1
     countyIndex += 1
 
