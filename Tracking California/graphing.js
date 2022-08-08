@@ -34,7 +34,7 @@ for (const [countyName, countyValues] of Object.entries(DATA)) {
   dataSeries[countyName] = {
     type: "scatter",
     toolTipContent:
-      '<span style="color:#4F81BC "><b>{name}</b></span><br/><b> Percentile:</b></span> {value}',
+      '<span style="color:#4F81BC "><b>{name}</b></span><br/><b> Value:</b></span> {value}',
     name: countyName,
     markerSize: NORMAL_MARKER_SIZE,
     dataPoints: dataPoints,
@@ -63,7 +63,7 @@ window.onload = function () {
       },
     },
     axisX: {
-      title: "Percentile",
+      title: "Value",
       interval: 10,
       maximum: 100,
       labelFontSize: textSize,
