@@ -3,12 +3,17 @@ const counties = Object.keys(DATA);
 const NORMAL_MARKER_SIZE = 14;
 const BIG_MARKER_SIZE = 20;
 const NORMAL_COLOR = "#D0D0D0";
+const SPREAD = 0.4;
 
 const indicatorToY = {};
 const YToIndicator = {};
+const mediansArr = {};
+const maxVals = {};
 for (let i = 0; i < indicators.length; i++) {
   indicatorToY[indicators[i]] = i + 1;
   YToIndicator[i + 1] = indicators[i];
+  mediansArr[indicators[i]] = medians[i];
+  maxVals[indicators[i]] = maxValues[i];
 }
 
 const countyColors = {};
@@ -22,13 +27,29 @@ for (let i = 0; i < counties.length; i++) {
 const dataSeries = {};
 for (const [countyName, countyValues] of Object.entries(DATA)) {
   const dataPoints = [];
+  console.log(countyValues);
   for (const [indicatorName, indicatorValue] of Object.entries(countyValues)) {
     if (indicatorValue !== "") {
+      const CENTER = indicatorToY[indicatorName];
       dataPoints.push({
-        y: indicatorToY[indicatorName],
-        x: indicatorValue,
+        y: CENTER, //randomAround(CENTER),
+        x:
+          (indicatorValue - mediansArr[indicatorName]) / maxVals[indicatorName],
         value: indicatorValue.toFixed(2),
       });
+      /* if (indicatorName === "Per Capita Income") {
+        console.log(
+          indicatorValue +
+            "         " +
+            (indicatorValue - mediansArr[indicatorName]) +
+            "         " +
+            indicatorValue.toFixed(2) / maxVal +
+            "         " +
+            maxVal +
+            "         " +
+            mediansArr[indicatorName]
+        );
+      } */
     }
   }
   dataSeries[countyName] = {
@@ -40,6 +61,10 @@ for (const [countyName, countyValues] of Object.entries(DATA)) {
     dataPoints: dataPoints,
     color: NORMAL_COLOR,
   };
+}
+
+function randomAround(center) {
+  return Math.random() * (center - SPREAD / 2) + center + SPREAD / 2;
 }
 
 const textSize = 16;
@@ -64,10 +89,10 @@ window.onload = function () {
     },
     axisX: {
       title: "Value",
-      interval: 10,
-      maximum: 100,
+      interval: 0.2,
+      minimum: -1,
+      maximum: 1,
       labelFontSize: textSize,
-      includeZero: true,
     },
     data: data,
   });

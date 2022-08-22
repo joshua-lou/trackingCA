@@ -145,24 +145,39 @@ writeResult(dataArr)
 # write json javascript
 json_data = {}
 json_indicator_data = []
-json_indicator_median = []
+json_indicator_medians = []
 for col in range(1,len(dataArr[0])):
-    col_array = []
     counties_json_data = {}
     for row in range(1,len(dataArr)):
         counties_json_data[dataArr[row][0]] = dataArr[row][col]
-        if (col != 0 and dataArr[row][col] != ''):
-            col_array.append(dataArr[row][col])
     json_data[dataArr[0][col]] = counties_json_data
-    json_indicator_median.append(statistics.median(col_array))
 
+# indicatorValues = []
+json_maxDiff = []
 for row in range(1, len(dataArr)):
+    row_array = []
     json_indicator_data.append(dataArr[row][0])
+   #  indicatorValues = []
+    for col in range(1,len(dataArr[0])):
+        if (row != 0 and dataArr[row][col] != ''):
+            row_array.append(dataArr[row][col])
+    json_indicator_medians.append(statistics.median(row_array))
+    max = 0 
+    for col in range(1,len(dataArr[0])):
+        if(dataArr[row][col] != '' and abs(float(dataArr[row][col]) - json_indicator_medians[-1]) > max):
+            max = abs(float(dataArr[row][col]) - json_indicator_medians[-1])
+        # indicatorValues.append(abs(dataArr[row][col] - json_indicator_medians[row]))
+    json_maxDiff.append(max)
+    if row == 3:
+        print(' '.join(map(str,row_array)))
+        print("\n")
+        print(json_indicator_medians[2])
 
 with open('indicator-data.js', 'w') as f:
     f.write("const DATA = " + json.dumps(json_data) + ";\n")
     f.write("const indicators = " + json.dumps(json_indicator_data) + ";\n")
-    f.write("const medians = " + json.dumps(json_indicator_median) + ";")
+    f.write("const maxValues = " + json.dumps(json_maxDiff) + ";\n")
+    f.write("const medians = " + json.dumps(json_indicator_medians) + ";")
 
 
 
