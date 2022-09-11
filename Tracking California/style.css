@@ -1,0 +1,15 @@
+body {
+  font-family: "Open Sans", sans-serif;
+}
+
+div#title {
+  margin: 10px 0px 20px 0px;
+  font-size: 30px;
+  font-weight: bold;
+  line-height: 40px;
+  color: #323132;
+}
+
+div#countiesDropdowns {
+  margin-bottom: 5px;
+}

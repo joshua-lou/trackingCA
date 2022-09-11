@@ -75,21 +75,20 @@ window.onload = function () {
     animationEnabled: true,
     height: 900,
     width: 1000,
-    /* title: {
-      text: "Explore all indicators",
-    }, */
+    title: {
+      text: "California County Indicators",
+    },
     axisY: {
-      title: "",
+      title: "Indicator",
       interval: 1,
       labelFontSize: textSize,
       gridThickness: 0,
-      labelTextAlign: "left",
       labelFormatter: (e) => {
         return YToIndicator[e.value] === undefined ? "" : YToIndicator[e.value];
       },
     },
     axisX: {
-      // title: "Median",
+      title: "Value",
       interval: 0.2,
       minimum: -1,
       maximum: 1,
