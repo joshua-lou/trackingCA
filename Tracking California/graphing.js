@@ -36,20 +36,7 @@ for (const [countyName, countyValues] of Object.entries(DATA)) {
         x:
           (indicatorValue - mediansArr[indicatorName]) / maxVals[indicatorName],
         value: indicatorValue.toFixed(2),
-      });
-      /* if (indicatorName === "Per Capita Income") {
-        console.log(
-          indicatorValue +
-            "         " +
-            (indicatorValue - mediansArr[indicatorName]) +
-            "         " +
-            indicatorValue.toFixed(2) / maxVal +
-            "         " +
-            maxVal +
-            "         " +
-            mediansArr[indicatorName]
-        );
-      } */
+      });   
     }
   }
   dataSeries[countyName] = {
@@ -67,7 +54,7 @@ function randomAround(center) {
   return Math.random() * (center - SPREAD / 2) + center + SPREAD / 2;
 }
 
-const textSize = 16;
+const axisTextSize = 15;
 const NUM_DROPDOWNS = 3;
 window.onload = function () {
   const data = Object.values(dataSeries);
@@ -81,7 +68,8 @@ window.onload = function () {
     axisY: {
       title: "",
       interval: 1,
-      labelFontSize: textSize,
+      labelFontSize: axisTextSize,
+      labelFontFamily: "Helvetica",
       gridThickness: 0,
       labelTextAlign: "left",
       labelFormatter: (e) => {
@@ -89,16 +77,28 @@ window.onload = function () {
       },
     },
     axisX: {
-      // title: "Median",
+      //title: "Median",
       interval: 0.2,
       minimum: -1,
       maximum: 1,
-      labelFontSize: textSize,
+      labelFontSize: axisTextSize,
+      labelFontFamily: "Helvetica",
+      stripLines:
+       [{                
+         startValue: -0.003,
+         endValue: 0.002,
+         opacity: .5,
+         color:"#FFA500"
+       }],
     },
     data: data,
+    legend: {
+      fontSize: 20
+    }
   });
   chart.render();
 
+  /* Draw county dropdowns */
   let countiesOptions = '<option value="" selected>-</option>';
   for (let i = 0; i < counties.length; i++) {
     countiesOptions +=
@@ -107,14 +107,18 @@ window.onload = function () {
   let dropdowns = "";
   for (let i = 0; i < NUM_DROPDOWNS; i++) {
     dropdowns +=
-      "<div>" +
-      "<strong> Select a county </strong>" +
+      "<div class='select-county'>" +
+      "<span class='select-county'> Select a county </span>" +
       '<select class="countyDropdown">' +
       countiesOptions +
       "</select>" +
       "</div>";
   }
   document.getElementById("countiesDropdowns").innerHTML = dropdowns;
+  const countyDropdowns = document.getElementsByClassName("countyDropdown");
+  for (let i = 0; i < countyDropdowns.length; i++) {
+    countyDropdowns[i].onchange = (event) => handleDropdownChange(event, i);
+  }
 
   const selected = new Array(NUM_DROPDOWNS).fill("");
   function handleDropdownChange(event, index) {
@@ -124,7 +128,7 @@ window.onload = function () {
     document.getElementById("counties-error").innerHTML = "";
     if (countyName !== "" && countyName === selected[1 - index]) {
       document.getElementById("counties-error").innerHTML =
-        "You can't select the same one";
+        "You can't select the same county.";
       event.target.value = selected[index];
       return;
     }
@@ -158,9 +162,5 @@ window.onload = function () {
     }
 
     chart.render();
-  }
-  const countyDropdowns = document.getElementsByClassName("countyDropdown");
-  for (let i = 0; i < countyDropdowns.length; i++) {
-    countyDropdowns[i].onchange = (event) => handleDropdownChange(event, i);
-  }
+  } 
 };

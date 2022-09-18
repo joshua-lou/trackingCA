@@ -168,10 +168,6 @@ for row in range(1, len(dataArr)):
             max = abs(float(dataArr[row][col]) - json_indicator_medians[-1])
         # indicatorValues.append(abs(dataArr[row][col] - json_indicator_medians[row]))
     json_maxDiff.append(max)
-    if row == 3:
-        print(' '.join(map(str,row_array)))
-        print("\n")
-        print(json_indicator_medians[2])
 
 with open('indicator-data.js', 'w') as f:
     f.write("const DATA = " + json.dumps(json_data) + ";\n")

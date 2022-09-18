@@ -8,11 +8,20 @@ file:///Users/Joshua/Dropbox/Family Share - Joshua/2_Extracurr/31_Tracking CA/tr
     <link rel="stylesheet" type="text/css" href="style.css" />
   </head>
   <body>
-    <div id="title"><span>Explore all indicators</span></div>
-    <div id="countiesDropdowns"></div>
-    <div id="counties-error"></div>
-    <div id="chartContainer"></div>
+    <div id='header-box'>
+      <h2>Explore all indicators</h2>
+      <div id="countiesDropdowns"></div>
+      <div id="counties-error"></div>
+    </div>
+    
+    <div id='legend-box'>
+      <div id='median'>Median</div>
+      <span id='worse'> ◄ Worse than the median</span>
+      <span id='better'>Better than the median ►</span>
+    </div>
 
+    <div id="chartContainer"></div>
+    
     <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
     <script src="indicator-data.js"></script>
     <script src="graphing.js"></script>

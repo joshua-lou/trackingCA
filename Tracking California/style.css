@@ -1,15 +1,53 @@
 body {
+  padding-left: 10px;
   font-family: "Open Sans", sans-serif;
 }
 
-div#title {
-  margin: 10px 0px 20px 0px;
-  font-size: 30px;
-  font-weight: bold;
-  line-height: 40px;
-  color: #323132;
+div#header-box {
+  margin: 0px 0 0px 0;
+  padding: 5px 0 10px 0;
+  border: black solid 0px;
+}
+
+h2 {
+    font-size: 30px;
+    font-weight: bold;
+    line-height: 40px;    
 }
 
 div#countiesDropdowns {
   margin-bottom: 5px;
+}
+
+div.select-county {
+  margin: 10px 0px 10px 10px;
+}
+
+span.select-county {
+  font-weight: bold;
+}
+
+select {
+  margin-left: 5px;
+  padding: 5px 50px 5px 6px;
+}
+
+div#counties-error { color: red; }
+
+div#legend-box {
+  border: black solid 0px;
+  /* chart size is in the graphing.js file. If chart size changes there,
+   these numbers need to be adjusted accordingly. */
+  width:  1000px;
+  margin: 0px 40px 0px 0px;
+  font-size: 13px;
+  color: #aaa;
+}
+div#legend-box div#median { padding-left: 580px; }
+div#legend-box span#worse { padding-left: 260px; }
+div#legend-box span#better { padding-left: 400px; }
+
+div#chartContainer {
+  width:  1000px;
+  height: 800px;
 }
